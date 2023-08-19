@@ -30,3 +30,9 @@ support x64, arm64
 support drop skeleton files to GUI for open directly
 > only match the first file ( `*.json`、`*.skel`)
 
+
+## Build
+
+```
+make build-mac
+```
