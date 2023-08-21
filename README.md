@@ -2,7 +2,7 @@ Skeleton Viewer
 ===
 Just [Skeleton Viewer](http://zh.esotericsoftware.com/spine-skeleton-viewer)
 
-support x64 (MacOS M1、M2)
+support x64 (Windows, MacOS M1、M2)
 
 ## Issue
 
@@ -25,6 +25,7 @@ setVisible(true);
 ### Support X64
 support x64, arm64
 > MacOS M1, M2
+> Windows x64
 
 ### DragDrop support
 support drop skeleton files to GUI for open directly
@@ -33,6 +34,10 @@ support drop skeleton files to GUI for open directly
 
 ## Build
 
-```
+```shell
+# on MacOS
 make build-mac
+
+# on Windows
+make build-windows
 ```
