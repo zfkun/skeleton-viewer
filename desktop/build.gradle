@@ -43,6 +43,72 @@ tasks.register('dist', Jar) {
     with jar
 }
 
+tasks.register('pack', Exec) {
+    dependsOn dist
+
+    workingDir = project.projectDir
+
+    def os = OperatingSystem.current()
+    def packDir = './pack'
+    def execName = 'SkeletonViewer'
+
+    def cmd = [
+            'echo',
+            '--name', execName,
+            '--dest', packDir,
+            '--input', workingDir.relativePath(jar.archiveFile.get().asFile.getParentFile()),
+		    '--main-jar', jar.archiveFileName.get(),
+		    '--app-version', version,
+            '--java-options', '-Xms128m',
+            '--java-options', '-Xmx1500m',
+    ]
+
+    if (os == OperatingSystem.MAC_OS) {
+        cmd.addAll([
+            '--java-options', '-XstartOnFirstThread',
+            '--icon', '../tools/icon.icns'
+        ])
+    }
+
+    if (os == OperatingSystem.WINDOWS) {
+        cmd.addAll([
+            '--icon', "../tools/icon.ico",
+
+            '--vendor', 'raven',
+
+            '--win-dir-chooser',
+            '--win-shortcut',
+            '--win-menu',
+            '--win-menu-group', execName,
+        ])
+    }
+
+    commandLine = cmd as List<String>
+
+    doFirst {
+        println "wait for packing (${os}) ..."
+    }
+
+    doLast {
+        def packFileName = "${execName}-${version}"
+
+        if (os == OperatingSystem.MAC_OS) {
+            println "wait for renaming (macos) ..."
+            if (os.nativePrefix == "aarch64") {
+                file(packDir + "/${packFileName}.dmg").renameTo(packDir + "/${packFileName}-silicon.dmg")
+            } else {
+                file(packDir + "/${packFileName}.dmg").renameTo(packDir + "/${packFileName}-intel.dmg")
+            }
+            println "renaming done"
+        }
+        else if (os == OperatingSystem.WINDOWS) {
+            println "wait for renaming (windows) ..."
+            file(packDir + "/${packFileName}.exe").renameTo(packDir + "/${packFileName}-${System.getProperty("os.arch")}.exe")
+            println "renaming done"
+        }
+    }
+}
+
 
 dist.dependsOn classes
 

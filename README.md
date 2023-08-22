@@ -32,12 +32,8 @@ support drop skeleton files to GUI for open directly
 > only match the first file ( `*.json`、`*.skel`)
 
 
-## Build
+## Packaging
 
-```shell
-# on MacOS
-make build-mac
+exec Task `:desktop:pack`
 
-# on Windows
-make build-windows
-```
+> packaging output to `desktop/pack/*`

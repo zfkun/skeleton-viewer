@@ -119,3 +119,7 @@ Thumbs.db
 /tools/*.pkg
 /tools/*.dmg
 /tools/*.exe
+/desktop/pack/
+/android/pack/
+/ios/pack/
+/html/pack/
