@@ -4,6 +4,11 @@ Just [Skeleton Viewer](http://zh.esotericsoftware.com/spine-skeleton-viewer)
 
 support x64 (Windows, MacOS M1、M2)
 
+## Version
+
+- Skeleton Viewer 2.0.0 for Spine 4.0.x
+- Skeleton Viewer 1.0.0 for Spine 3.8.x
+
 ## Issue
 
 ### GUI Block
