@@ -53,7 +53,7 @@ tasks.register('pack', Exec) {
     def execName = 'SkeletonViewer'
 
     def cmd = [
-            'echo',
+            'jpackage',
             '--name', execName,
             '--dest', packDir,
             '--input', workingDir.relativePath(jar.archiveFile.get().asFile.getParentFile()),
@@ -94,7 +94,7 @@ tasks.register('pack', Exec) {
 
         if (os == OperatingSystem.MAC_OS) {
             println "wait for renaming (macos) ..."
-            if (os.nativePrefix == "aarch64") {
+            if (System.getProperty("os.arch") == "aarch64") {
                 file(packDir + "/${packFileName}.dmg").renameTo(packDir + "/${packFileName}-silicon.dmg")
             } else {
                 file(packDir + "/${packFileName}.dmg").renameTo(packDir + "/${packFileName}-intel.dmg")
