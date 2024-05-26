@@ -1,16 +1,16 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated September 24, 2021. Replaces all prior versions.
+ * Last updated July 28, 2023. Replaces all prior versions.
  *
- * Copyright (c) 2013-2021, Esoteric Software LLC
+ * Copyright (c) 2013-2023, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software
- * or otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software or
+ * otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,8 +23,8 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
+ * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
 package com.esotericsoftware.spine;
@@ -48,6 +48,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.esotericsoftware.spine.Animation.MixBlend;
 import com.esotericsoftware.spine.AnimationState.AnimationStateAdapter;
 import com.esotericsoftware.spine.AnimationState.TrackEntry;
+import com.esotericsoftware.spine.Skeleton.Physics;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
 public class SkeletonViewer extends ApplicationAdapter {
@@ -72,7 +73,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 	SkeletonData skeletonData;
 	Skeleton skeleton;
 	AnimationState state;
-	FileHandle skeletonFile;
+	FileHandle skeletonFile, lastFile;
 	long skeletonModified, atlasModified;
 	float lastModifiedCheck, reloadTimer;
 	final StringBuilder status = new StringBuilder();
@@ -80,6 +81,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 	public void create () {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			public void uncaughtException (Thread thread, Throwable ex) {
+				System.out.println("Uncaught exception:");
 				ex.printStackTrace();
 				Runtime.getRuntime().halt(0); // Prevent Swing from keeping JVM alive.
 			}
@@ -123,6 +125,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 
 		FileHandle oldSkeletonFile = this.skeletonFile;
 		this.skeletonFile = skeletonFile;
+		lastFile = skeletonFile;
 		reloadTimer = 0;
 
 		try {
@@ -139,6 +142,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 			skeletonData = loader.readSkeletonData(skeletonFile);
 			if (skeletonData.getBones().size == 0) throw new Exception("No bones in skeleton data.");
 		} catch (Throwable ex) {
+			System.out.println("Error loading skeleton: " + skeletonFile.path());
 			ex.printStackTrace();
 			ui.toast("Error loading skeleton: " + skeletonFile.name());
 			this.skeletonFile = oldSkeletonFile;
@@ -146,10 +150,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 		}
 
 		skeleton = new Skeleton(skeletonData);
-		skeleton.updateWorldTransform();
-		skeleton.setToSetupPose();
-		skeleton = new Skeleton(skeleton); // Tests copy constructors.
-		skeleton.updateWorldTransform();
+		skeleton.updateWorldTransform(Physics.update);
 
 		state = new AnimationState(new AnimationStateData(skeletonData));
 		state.addListener(new AnimationStateAdapter() {
@@ -201,7 +202,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 			entry = state.setAnimation(track, ui.animationList.getSelected(), ui.loopCheckbox.isChecked());
 			entry.setHoldPrevious(track > 0 && ui.holdPrevCheckbox.isChecked());
 		}
-		entry.setMixBlend(ui.addCheckbox.isChecked() ? MixBlend.add : MixBlend.replace);
+		entry.setMixBlend(track > 0 && ui.addCheckbox.isChecked() ? MixBlend.add : MixBlend.replace);
 		entry.setReverse(ui.reverseCheckbox.isChecked());
 		entry.setAlpha(ui.alphaSlider.getValue());
 	}
@@ -261,7 +262,8 @@ public class SkeletonViewer extends ApplicationAdapter {
 			delta = Math.min(delta, 0.032f) * ui.speedSlider.getValue();
 			state.update(delta);
 			state.apply(skeleton);
-			skeleton.updateWorldTransform();
+			skeleton.update(delta);
+			skeleton.updateWorldTransform(Physics.update);
 
 			batch.begin();
 			renderer.draw(batch, skeleton);
@@ -342,5 +344,10 @@ public class SkeletonViewer extends ApplicationAdapter {
 		((ScreenViewport)ui.stage.getViewport()).setUnitsPerPixel(1 / uiScale);
 		ui.stage.getViewport().update(width, height, true);
 		if (!ui.minimizeButton.isChecked()) ui.window.setHeight(height / uiScale + 8);
+	}
+
+	public void dispose () {
+		super.dispose();
+		Runtime.getRuntime().exit(0);
 	}
 }

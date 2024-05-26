@@ -1,16 +1,16 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated September 24, 2021. Replaces all prior versions.
+ * Last updated July 28, 2023. Replaces all prior versions.
  *
- * Copyright (c) 2013-2021, Esoteric Software LLC
+ * Copyright (c) 2013-2023, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software
- * or otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software or
+ * otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,8 +23,8 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
+ * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
 package com.esotericsoftware.spine;
@@ -62,6 +62,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Null;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -85,11 +86,12 @@ class SkeletonViewerUI {
     Window window = new Window("Skeleton", skin);
     Table root = new Table(skin);
     TextButton openButton = new TextButton("Open", skin);
+    TextButton reloadButton = new TextButton("Reload", skin);
     TextButton minimizeButton = new TextButton("-", skin);
 
     Slider loadScaleSlider = new Slider(0.1f, 3, 0.01f, false, skin);
     Label loadScaleLabel = new Label("100%", skin);
-    TextButton loadScaleResetButton = new TextButton("Reload", skin);
+    TextButton loadScaleResetButton = new TextButton("Reset", skin);
 
     Slider zoomSlider = new Slider(0.01f, 10, 0.01f, false, skin);
     Label zoomLabel = new Label("100%", skin);
@@ -125,7 +127,9 @@ class SkeletonViewerUI {
 
     ButtonGroup<TextButton> trackButtons = new ButtonGroup();
     CheckBox loopCheckbox = new CheckBox("Loop", skin);
-    CheckBox addCheckbox = new CheckBox("Add", skin);
+    CheckBox reverseCheckbox = new CheckBox("Reverse", skin);
+    CheckBox holdPrevCheckbox = new HigherTrackCheckBox("Hold previous");
+    CheckBox addCheckbox = new HigherTrackCheckBox("Add");
 
     Slider alphaSlider = new Slider(0, 1, 0.01f, false, skin);
     Label alphaLabel = new Label("100%", skin);
@@ -136,9 +140,6 @@ class SkeletonViewerUI {
     Slider speedSlider = new Slider(0, 3, 0.01f, false, skin);
     Label speedLabel = new Label("1.0x", skin);
     TextButton speedResetButton = new TextButton("Reset", skin);
-
-    CheckBox reverseCheckbox = new CheckBox("Reverse", skin);
-    CheckBox holdPrevCheckbox = new CheckBox("Hold previous", skin);
 
     Slider mixSlider = new Slider(0, 4, 0.01f, false, skin);
     Label mixLabel = new Label("0.3s", skin);
@@ -169,16 +170,16 @@ class SkeletonViewerUI {
         loopCheckbox.setChecked(true);
 
         loadScaleSlider.setValue(1);
-        loadScaleSlider.setSnapToValues(new float[] {0.5f, 1, 1.5f, 2, 2.5f}, 0.09f);
+        loadScaleSlider.setSnapToValues(0.09f, 0.5f, 1, 1.5f, 2, 2.5f);
 
         zoomSlider.setValue(1);
-        zoomSlider.setSnapToValues(new float[] {1, 2}, 0.30f);
+        zoomSlider.setSnapToValues(0.30f, 1, 2);
 
         xScaleSlider.setValue(1);
-        xScaleSlider.setSnapToValues(new float[] {-1.5f, -1, -0.5f, 0.5f, 1, 1.5f}, 0.12f);
+        xScaleSlider.setSnapToValues(0.12f, -1.5f, -1, -0.5f, 0.5f, 1, 1.5f);
 
         yScaleSlider.setValue(1);
-        yScaleSlider.setSnapToValues(new float[] {-1.5f, -1, -0.5f, 0.5f, 1, 1.5f}, 0.12f);
+        yScaleSlider.setSnapToValues(0.12f, -1.5f, -1, -0.5f, 0.5f, 1, 1.5f);
 
         skinList.getSelection().setRequired(false);
         skinList.getSelection().setToggle(true);
@@ -187,13 +188,14 @@ class SkeletonViewerUI {
         animationList.getSelection().setToggle(true);
 
         mixSlider.setValue(0.3f);
-        mixSlider.setSnapToValues(new float[] {1, 1.5f, 2, 2.5f, 3, 3.5f}, 0.12f);
+        mixSlider.setSnapToValues(0.12f, 1, 1.5f, 2, 2.5f, 3, 3.5f);
 
         speedSlider.setValue(1);
-        speedSlider.setSnapToValues(new float[] {0.5f, 0.75f, 1, 1.25f, 1.5f, 2, 2.5f}, 0.09f);
+        speedSlider.setSnapToValues(0.09f, 0.5f, 0.75f, 1, 1.25f, 1.5f, 2, 2.5f);
 
         alphaSlider.setValue(1);
         alphaSlider.setDisabled(true);
+        alphaLabel.setColor(skin.getColor("disabled"));
 
         addCheckbox.setDisabled(true);
         holdPrevCheckbox.setDisabled(true);
@@ -205,7 +207,8 @@ class SkeletonViewerUI {
         window.setY(-2);
 
         window.getTitleLabel().setColor(new Color(0xc1ffffff));
-        window.getTitleTable().add(openButton).space(3);
+        window.getTitleTable().add(openButton).spaceLeft(10);
+        window.getTitleTable().add(reloadButton).space(3);
         window.getTitleTable().add(minimizeButton).width(20);
 
         skinScroll.setFadeScrollBars(false);
@@ -381,6 +384,13 @@ class SkeletonViewerUI {
             }
         });
 
+        reloadButton.addListener(new ChangeListener() {
+            public void changed (ChangeEvent event, Actor actor) {
+                viewer.resetCameraPosition();
+                if (viewer.loadSkeleton(viewer.lastFile)) toast("Reloaded.");
+            }
+        });
+
         minimizeButton.addListener(new ClickListener() {
             public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
                 event.cancel();
@@ -397,6 +407,7 @@ class SkeletonViewerUI {
                     window.setHeight(Gdx.graphics.getHeight() / SkeletonViewer.uiScale + 8);
                     minimizeButton.setText("-");
                 }
+                window.setWidth(window.getPrefWidth());
             }
         });
 
@@ -404,17 +415,12 @@ class SkeletonViewerUI {
             public void changed (ChangeEvent event, Actor actor) {
                 loadScaleLabel.setText(Integer.toString((int)(loadScaleSlider.getValue() * 100)) + "%");
                 if (!loadScaleSlider.isDragging() && viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
-                loadScaleResetButton.setText(loadScaleSlider.getValue() == 1 ? "Reload" : "Reset");
             }
         });
         loadScaleResetButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 viewer.resetCameraPosition();
-                if (loadScaleSlider.getValue() == 1) {
-                    if (viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
-                } else
-                    loadScaleSlider.setValue(1);
-                loadScaleResetButton.setText("Reload");
+                loadScaleSlider.setValue(1);
             }
         });
 
@@ -557,6 +563,7 @@ class SkeletonViewerUI {
                 animationList.getSelection().setProgrammaticChangeEvents(true);
 
                 alphaSlider.setDisabled(track == 0);
+                alphaLabel.setColor(track == 0 ? skin.getColor("disabled") : Color.WHITE);
                 alphaSlider.setValue(current == null ? 1 : current.alpha);
 
                 addCheckbox.setDisabled(track == 0);
@@ -564,9 +571,11 @@ class SkeletonViewerUI {
 
                 if (current != null) {
                     loopCheckbox.setChecked(current.getLoop());
-                    addCheckbox.setChecked(current.getMixBlend() == MixBlend.add);
                     reverseCheckbox.setChecked(current.getReverse());
-                    holdPrevCheckbox.setChecked(current.getHoldPrevious());
+                    if (track > 0) {
+                        addCheckbox.setChecked(current.getMixBlend() == MixBlend.add);
+                        holdPrevCheckbox.setChecked(current.getHoldPrevious());
+                    }
                 }
             }
         };
@@ -760,6 +769,17 @@ class SkeletonViewerUI {
         } catch (Throwable ex) {
             System.out.println("Unable to read preferences:");
             ex.printStackTrace();
+        }
+    }
+
+    class HigherTrackCheckBox extends CheckBox {
+        public HigherTrackCheckBox (String text) {
+            super(text, skin);
+        }
+
+        protected Drawable getImageDrawable () {
+            if (trackButtons.getCheckedIndex() == 0) return getStyle().checkboxOffDisabled;
+            return super.getImageDrawable();
         }
     }
 }

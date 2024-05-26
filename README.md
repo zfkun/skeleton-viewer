@@ -6,6 +6,7 @@ support x64 (Windows, MacOS M1、M2)
 
 ## Version
 
+- Skeleton Viewer 2.2.0 for Spine 4.2.x
 - Skeleton Viewer 2.1.0 for Spine 4.1.x
 - Skeleton Viewer 2.0.0 for Spine 4.0.x
 - Skeleton Viewer 1.0.0 for Spine 3.8.x

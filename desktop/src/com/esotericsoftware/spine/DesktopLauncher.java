@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
-	final static String version = "4.1.0 (Support Drop Files)";
+	final static String version = "4.2.0 (Support Drop Files)";
 
 	static float getDpi() {
 		String os = System.getProperty("os.name");
