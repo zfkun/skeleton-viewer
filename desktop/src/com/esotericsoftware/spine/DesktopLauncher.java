@@ -13,19 +13,21 @@ import java.lang.reflect.Field;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
-	final static String version = "4.0.18.1 (Support Drop Files)";
+	final static String version = "4.1.0 (Support Drop Files)";
 
 	static float getDpi() {
 		String os = System.getProperty("os.name");
 		float dpiScale = 1;
 
 		if (os.contains("Windows")) {
-			dpiScale = (float) Toolkit.getDefaultToolkit().getScreenResolution() / 96;
+			dpiScale = (float) Toolkit.getDefaultToolkit().getScreenResolution() / 96f;
 		}
 		else if (os.contains("OS X")) {
-			// TODO: real dpi
-			return 1;
+			Object object = Toolkit.getDefaultToolkit().getDesktopProperty("apple.awt.contentScaleFactor");
+			if (object instanceof Float && ((Float)object).intValue() >= 2) dpiScale = 2;
 		}
+
+		if (dpiScale >= 2.0f) dpiScale = 2;
 
 		return dpiScale;
 	}
@@ -39,7 +41,7 @@ public class DesktopLauncher {
 			unsafeField.setAccessible(true);
 			Object unsafe = unsafeField.get(null);
 			Long offset = (Long)unsafeClass.getMethod("staticFieldOffset", Field.class).invoke(unsafe, loggerField);
-			unsafeClass.getMethod("putObjectVolatile", Object.class, long.class, Object.class)
+			unsafeClass.getMethod("putObjectVolatile", Object.class, long.class, Object.class) //
 					.invoke(unsafe, loggerClass, offset, null);
 		} catch (Throwable ex) {
 		}
@@ -50,9 +52,11 @@ public class DesktopLauncher {
 		SkeletonViewer viewer = new SkeletonViewer();
 
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.disableAudio(true);
 		config.setForegroundFPS(60);
 		config.setTitle("Skeleton Viewer - " + version);
 		config.setWindowedMode((int) (800 * SkeletonViewer.uiScale), (int) (600 * SkeletonViewer.uiScale));
+		config.setBackBufferConfig(8, 8, 8, 8, 24, 0, 2);
 		config.setWindowListener(new Lwjgl3WindowListener() {
 			@Override
 			public void created(Lwjgl3Window window) {}

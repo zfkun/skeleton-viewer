@@ -1,8 +1,8 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated January 1, 2020. Replaces all prior versions.
+ * Last updated September 24, 2021. Replaces all prior versions.
  *
- * Copyright (c) 2013-2020, Esoteric Software LLC
+ * Copyright (c) 2013-2021, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
@@ -95,8 +95,9 @@ public class SkeletonViewer extends ApplicationAdapter {
 		ui.loadPrefs();
 
 		if (args.length == 0) {
-			loadSkeleton(
-					Gdx.files.internal(Gdx.app.getPreferences("spine-skeletonviewer").getString("lastFile", "spineboy/spineboy.json")));
+			FileHandle file = Gdx.files
+					.internal(Gdx.app.getPreferences("spine-skeletonviewer").getString("lastFile", "spineboy/spineboy.json"));
+			if (file.exists()) loadSkeleton(file);
 		} else
 			loadSkeleton(Gdx.files.internal(args[0]));
 
@@ -111,8 +112,15 @@ public class SkeletonViewer extends ApplicationAdapter {
 		}
 	}
 
-	boolean loadSkeleton (final @Null FileHandle skeletonFile) {
+	boolean loadSkeleton (@Null FileHandle skeletonFile) {
 		if (skeletonFile == null) return false;
+
+		try {
+			skeletonFile = new FileHandle(skeletonFile.file().getCanonicalFile());
+		} catch (Throwable ex) {
+			skeletonFile = new FileHandle(skeletonFile.file().getAbsoluteFile());
+		}
+
 		FileHandle oldSkeletonFile = this.skeletonFile;
 		this.skeletonFile = skeletonFile;
 		reloadTimer = 0;
@@ -131,7 +139,6 @@ public class SkeletonViewer extends ApplicationAdapter {
 			skeletonData = loader.readSkeletonData(skeletonFile);
 			if (skeletonData.getBones().size == 0) throw new Exception("No bones in skeleton data.");
 		} catch (Throwable ex) {
-			System.out.println("Error loading skeleton: " + skeletonFile.file().getAbsolutePath());
 			ex.printStackTrace();
 			ui.toast("Error loading skeleton: " + skeletonFile.name());
 			this.skeletonFile = oldSkeletonFile;
@@ -231,10 +238,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 				}
 			} else {
 				reloadTimer -= delta;
-				if (reloadTimer <= 0) {
-					loadSkeleton(skeletonFile);
-					ui.toast("Reloaded.");
-				}
+				if (reloadTimer <= 0 && loadSkeleton(skeletonFile)) ui.toast("Reloaded.");
 			}
 
 			// Pose and render skeleton.
@@ -247,8 +251,14 @@ public class SkeletonViewer extends ApplicationAdapter {
 			if (skeleton.scaleY == 0) skeleton.scaleY = 0.01f;
 			skeleton.setScale(scaleX, scaleY);
 
+			if (ui.setupPoseButton.isChecked())
+				skeleton.setToSetupPose();
+			else if (ui.bonesSetupPoseButton.isChecked())
+				skeleton.setBonesToSetupPose();
+			else if (ui.slotsSetupPoseButton.isChecked()) //
+				skeleton.setSlotsToSetupPose();
+
 			delta = Math.min(delta, 0.032f) * ui.speedSlider.getValue();
-			skeleton.update(delta);
 			state.update(delta);
 			state.apply(skeleton);
 			skeleton.updateWorldTransform();

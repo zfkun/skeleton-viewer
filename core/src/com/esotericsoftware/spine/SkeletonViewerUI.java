@@ -1,3 +1,32 @@
+/******************************************************************************
+ * Spine Runtimes License Agreement
+ * Last updated September 24, 2021. Replaces all prior versions.
+ *
+ * Copyright (c) 2013-2021, Esoteric Software LLC
+ *
+ * Integration of the Spine Runtimes into software or otherwise creating
+ * derivative works of the Spine Runtimes is permitted under the terms and
+ * conditions of Section 2 of the Spine Editor License Agreement:
+ * http://esotericsoftware.com/spine-editor-license
+ *
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software
+ * or otherwise create derivative works of the Spine Runtimes (collectively,
+ * "Products"), provided that each user of the Products must obtain their own
+ * Spine Editor license and redistribution of the Products in any form must
+ * include this license and copyright notice.
+ *
+ * THE SPINE RUNTIMES ARE PROVIDED BY ESOTERIC SOFTWARE LLC "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL ESOTERIC SOFTWARE LLC BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
+ * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *****************************************************************************/
+
 package com.esotericsoftware.spine;
 
 import static com.badlogic.gdx.math.Interpolation.*;
@@ -87,9 +116,9 @@ class SkeletonViewerUI {
 
     CheckBox linearCheckbox = new CheckBox("Linear", skin);
 
-    TextButton bonesSetupPoseButton = new TextButton("Bones", skin);
-    TextButton slotsSetupPoseButton = new TextButton("Slots", skin);
-    TextButton setupPoseButton = new TextButton("Both", skin);
+    TextButton bonesSetupPoseButton = new TextButton("Bones", skin, "toggle");
+    TextButton slotsSetupPoseButton = new TextButton("Slots", skin, "toggle");
+    TextButton setupPoseButton = new TextButton("Both", skin, "toggle");
 
     List<String> skinList = new List(skin);
     ScrollPane skinScroll = new ScrollPane(skinList, skin, "bg");
@@ -134,6 +163,8 @@ class SkeletonViewerUI {
         pmaCheckbox.setChecked(true);
 
         linearCheckbox.setChecked(true);
+
+        new ButtonGroup(bonesSetupPoseButton, slotsSetupPoseButton, setupPoseButton).setMinCheckCount(0);
 
         loopCheckbox.setChecked(true);
 
@@ -346,7 +377,6 @@ class SkeletonViewerUI {
         });
         slotsSetupPoseButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
-                viewer.skeleton.getRootBone().getChildren();
                 if (viewer.skeleton != null) viewer.skeleton.setSlotsToSetupPose();
             }
         });
@@ -373,10 +403,7 @@ class SkeletonViewerUI {
         loadScaleSlider.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 loadScaleLabel.setText(Integer.toString((int)(loadScaleSlider.getValue() * 100)) + "%");
-                if (!loadScaleSlider.isDragging()) {
-                    viewer.loadSkeleton(viewer.skeletonFile);
-                    toast("Reloaded.");
-                }
+                if (!loadScaleSlider.isDragging() && viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
                 loadScaleResetButton.setText(loadScaleSlider.getValue() == 1 ? "Reload" : "Reset");
             }
         });
@@ -384,8 +411,7 @@ class SkeletonViewerUI {
             public void changed (ChangeEvent event, Actor actor) {
                 viewer.resetCameraPosition();
                 if (loadScaleSlider.getValue() == 1) {
-                    viewer.loadSkeleton(viewer.skeletonFile);
-                    toast("Reloaded.");
+                    if (viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
                 } else
                     loadScaleSlider.setValue(1);
                 loadScaleResetButton.setText("Reload");
@@ -597,6 +623,10 @@ class SkeletonViewerUI {
         debugPointsCheckbox.addListener(savePrefsListener);
         debugClippingCheckbox.addListener(savePrefsListener);
         pmaCheckbox.addListener(savePrefsListener);
+        linearCheckbox.addListener(savePrefsListener);
+        bonesSetupPoseButton.addListener(savePrefsListener);
+        slotsSetupPoseButton.addListener(savePrefsListener);
+        setupPoseButton.addListener(savePrefsListener);
         loopCheckbox.addListener(savePrefsListener);
         addCheckbox.addListener(savePrefsListener);
         holdPrevCheckbox.addListener(savePrefsListener);
@@ -665,6 +695,15 @@ class SkeletonViewerUI {
         prefs.putBoolean("debugPoints", debugPointsCheckbox.isChecked());
         prefs.putBoolean("debugClipping", debugClippingCheckbox.isChecked());
         prefs.putBoolean("premultiplied", pmaCheckbox.isChecked());
+        prefs.putBoolean("linear", linearCheckbox.isChecked());
+        if (bonesSetupPoseButton.isChecked())
+            prefs.putString("setupPose", "bones");
+        else if (slotsSetupPoseButton.isChecked())
+            prefs.putString("setupPose", "slots");
+        else if (setupPoseButton.isChecked()) //
+            prefs.putString("setupPose", "both");
+        else
+            prefs.remove("setupPose");
         prefs.putBoolean("loop", loopCheckbox.isChecked());
         prefs.putBoolean("add", addCheckbox.isChecked());
         prefs.putBoolean("holdPrev", holdPrevCheckbox.isChecked());
@@ -698,6 +737,11 @@ class SkeletonViewerUI {
             debugPointsCheckbox.setChecked(prefs.getBoolean("debugPoints", true));
             debugClippingCheckbox.setChecked(prefs.getBoolean("debugClipping", true));
             pmaCheckbox.setChecked(prefs.getBoolean("premultiplied", true));
+            linearCheckbox.setChecked(prefs.getBoolean("linear", true));
+            String setupPose = prefs.getString("setupPose", "");
+            bonesSetupPoseButton.setChecked(setupPose.equals("bones"));
+            slotsSetupPoseButton.setChecked(setupPose.equals("slots"));
+            setupPoseButton.setChecked(setupPose.equals("both"));
             loopCheckbox.setChecked(prefs.getBoolean("loop", true));
             addCheckbox.setChecked(prefs.getBoolean("add", false));
             holdPrevCheckbox.setChecked(prefs.getBoolean("holdPrev", false));
