@@ -4,6 +4,13 @@ Just [Skeleton Viewer](http://zh.esotericsoftware.com/spine-skeleton-viewer)
 
 support x64 (Windows, MacOS M1、M2)
 
+## Version
+
+- Skeleton Viewer 2.2.x for Spine 4.2.x
+- Skeleton Viewer 2.1.x for Spine 4.1.x
+- Skeleton Viewer 2.0.x for Spine 4.0.x
+- Skeleton Viewer 1.0.x for Spine 3.8.x
+
 ## Issue
 
 ### GUI Block
@@ -36,6 +43,8 @@ support drop skeleton files to GUI for open directly
 
 > in windows, need [Wix3](https://github.com/wixtoolset/wix3/releases)
 
-.\gradlew `:desktop:pack`
+```shell
+.\gradlew :desktop:pack
+```
 
 > packaging output to `desktop/pack/*`
