@@ -87,9 +87,9 @@ class SkeletonViewerUI {
 
     CheckBox linearCheckbox = new CheckBox("Linear", skin);
 
-    TextButton bonesSetupPoseButton = new TextButton("Bones", skin);
-    TextButton slotsSetupPoseButton = new TextButton("Slots", skin);
-    TextButton setupPoseButton = new TextButton("Both", skin);
+    TextButton bonesSetupPoseButton = new TextButton("Bones", skin, "toggle");
+    TextButton slotsSetupPoseButton = new TextButton("Slots", skin, "toggle");
+    TextButton setupPoseButton = new TextButton("Both", skin, "toggle");
 
     List<String> skinList = new List(skin);
     ScrollPane skinScroll = new ScrollPane(skinList, skin, "bg");
@@ -134,6 +134,8 @@ class SkeletonViewerUI {
         pmaCheckbox.setChecked(true);
 
         linearCheckbox.setChecked(true);
+
+        new ButtonGroup(bonesSetupPoseButton, slotsSetupPoseButton, setupPoseButton).setMinCheckCount(0);
 
         loopCheckbox.setChecked(true);
 
@@ -346,7 +348,6 @@ class SkeletonViewerUI {
         });
         slotsSetupPoseButton.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
-                viewer.skeleton.getRootBone().getChildren();
                 if (viewer.skeleton != null) viewer.skeleton.setSlotsToSetupPose();
             }
         });
@@ -373,10 +374,7 @@ class SkeletonViewerUI {
         loadScaleSlider.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 loadScaleLabel.setText(Integer.toString((int)(loadScaleSlider.getValue() * 100)) + "%");
-                if (!loadScaleSlider.isDragging()) {
-                    viewer.loadSkeleton(viewer.skeletonFile);
-                    toast("Reloaded.");
-                }
+                if (!loadScaleSlider.isDragging() && viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
                 loadScaleResetButton.setText(loadScaleSlider.getValue() == 1 ? "Reload" : "Reset");
             }
         });
@@ -384,8 +382,7 @@ class SkeletonViewerUI {
             public void changed (ChangeEvent event, Actor actor) {
                 viewer.resetCameraPosition();
                 if (loadScaleSlider.getValue() == 1) {
-                    viewer.loadSkeleton(viewer.skeletonFile);
-                    toast("Reloaded.");
+                    if (viewer.loadSkeleton(viewer.skeletonFile)) toast("Reloaded.");
                 } else
                     loadScaleSlider.setValue(1);
                 loadScaleResetButton.setText("Reload");
@@ -597,6 +594,10 @@ class SkeletonViewerUI {
         debugPointsCheckbox.addListener(savePrefsListener);
         debugClippingCheckbox.addListener(savePrefsListener);
         pmaCheckbox.addListener(savePrefsListener);
+        linearCheckbox.addListener(savePrefsListener);
+        bonesSetupPoseButton.addListener(savePrefsListener);
+        slotsSetupPoseButton.addListener(savePrefsListener);
+        setupPoseButton.addListener(savePrefsListener);
         loopCheckbox.addListener(savePrefsListener);
         addCheckbox.addListener(savePrefsListener);
         holdPrevCheckbox.addListener(savePrefsListener);
@@ -665,6 +666,15 @@ class SkeletonViewerUI {
         prefs.putBoolean("debugPoints", debugPointsCheckbox.isChecked());
         prefs.putBoolean("debugClipping", debugClippingCheckbox.isChecked());
         prefs.putBoolean("premultiplied", pmaCheckbox.isChecked());
+        prefs.putBoolean("linear", linearCheckbox.isChecked());
+        if (bonesSetupPoseButton.isChecked())
+            prefs.putString("setupPose", "bones");
+        else if (slotsSetupPoseButton.isChecked())
+            prefs.putString("setupPose", "slots");
+        else if (setupPoseButton.isChecked()) //
+            prefs.putString("setupPose", "both");
+        else
+            prefs.remove("setupPose");
         prefs.putBoolean("loop", loopCheckbox.isChecked());
         prefs.putBoolean("add", addCheckbox.isChecked());
         prefs.putBoolean("holdPrev", holdPrevCheckbox.isChecked());
@@ -698,6 +708,11 @@ class SkeletonViewerUI {
             debugPointsCheckbox.setChecked(prefs.getBoolean("debugPoints", true));
             debugClippingCheckbox.setChecked(prefs.getBoolean("debugClipping", true));
             pmaCheckbox.setChecked(prefs.getBoolean("premultiplied", true));
+            linearCheckbox.setChecked(prefs.getBoolean("linear", true));
+            String setupPose = prefs.getString("setupPose", "");
+            bonesSetupPoseButton.setChecked(setupPose.equals("bones"));
+            slotsSetupPoseButton.setChecked(setupPose.equals("slots"));
+            setupPoseButton.setChecked(setupPose.equals("both"));
             loopCheckbox.setChecked(prefs.getBoolean("loop", true));
             addCheckbox.setChecked(prefs.getBoolean("add", false));
             holdPrevCheckbox.setChecked(prefs.getBoolean("holdPrev", false));

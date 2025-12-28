@@ -80,6 +80,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 	public void create () {
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			public void uncaughtException (Thread thread, Throwable ex) {
+				System.out.println("Uncaught exception:");
 				ex.printStackTrace();
 				Runtime.getRuntime().halt(0); // Prevent Swing from keeping JVM alive.
 			}
@@ -231,10 +232,7 @@ public class SkeletonViewer extends ApplicationAdapter {
 				}
 			} else {
 				reloadTimer -= delta;
-				if (reloadTimer <= 0) {
-					loadSkeleton(skeletonFile);
-					ui.toast("Reloaded.");
-				}
+				if (reloadTimer <= 0 && loadSkeleton(skeletonFile)) ui.toast("Reloaded.");
 			}
 
 			// Pose and render skeleton.
@@ -246,6 +244,13 @@ public class SkeletonViewer extends ApplicationAdapter {
 			if (skeleton.scaleX == 0) skeleton.scaleX = 0.01f;
 			if (skeleton.scaleY == 0) skeleton.scaleY = 0.01f;
 			skeleton.setScale(scaleX, scaleY);
+
+			if (ui.setupPoseButton.isChecked())
+				skeleton.setToSetupPose();
+			else if (ui.bonesSetupPoseButton.isChecked())
+				skeleton.setBonesToSetupPose();
+			else if (ui.slotsSetupPoseButton.isChecked()) //
+				skeleton.setSlotsToSetupPose();
 
 			delta = Math.min(delta, 0.032f) * ui.speedSlider.getValue();
 			skeleton.update(delta);
