@@ -55,6 +55,7 @@ public class DesktopLauncher {
 		config.disableAudio(true);
 		config.setForegroundFPS(60);
 		config.setTitle("Skeleton Viewer - " + version);
+        config.setWindowIcon(Files.FileType.Internal, "icon.bmp");
 		config.setWindowedMode((int) (800 * SkeletonViewer.uiScale), (int) (600 * SkeletonViewer.uiScale));
 		config.setBackBufferConfig(8, 8, 8, 8, 24, 0, 2);
 		config.setWindowListener(new Lwjgl3WindowListener() {
