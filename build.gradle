@@ -2,11 +2,12 @@ buildscript {
     
 
     repositories {
-        mavenLocal()
-        mavenCentral()
-        gradlePluginPortal()
+        maven { url "https://maven.aliyun.com/repository/public" }
+//        mavenLocal()
+//        mavenCentral()
+//        gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        google()
+//        google()
     }
     dependencies {
         
@@ -17,7 +18,7 @@ buildscript {
 allprojects {
     apply plugin: "eclipse"
 
-    version = '1.0.0'
+    version = '1.0.1'
     ext {
         appName = "Skeleton Viewer"
         gdxVersion = '1.12.0'
@@ -30,10 +31,11 @@ allprojects {
     }
 
     repositories {
-        mavenLocal()
-        mavenCentral()
-        google()
-        gradlePluginPortal()
+        maven { url "https://maven.aliyun.com/repository/public" }
+//        mavenLocal()
+//        mavenCentral()
+//        google()
+//        gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url "https://jitpack.io" }

@@ -38,6 +38,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Skeleton Viewer - " + version);
+        config.setWindowIcon(Files.FileType.Internal, "icon.bmp");
 		config.setWindowedMode((int) (800 * SkeletonViewer.uiScale), (int) (600 * SkeletonViewer.uiScale));
 		config.setWindowListener(new Lwjgl3WindowListener() {
 			@Override

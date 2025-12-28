@@ -34,6 +34,8 @@ support drop skeleton files to GUI for open directly
 
 ## Packaging
 
-exec Task `:desktop:pack`
+> in windows, need [Wix3](https://github.com/wixtoolset/wix3/releases)
+
+.\gradlew `:desktop:pack`
 
 > packaging output to `desktop/pack/*`
