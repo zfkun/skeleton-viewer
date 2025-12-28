@@ -53,7 +53,7 @@ tasks.register('pack', Exec) {
     def execName = 'SkeletonViewer'
 
     def cmd = [
-            'echo',
+            'jpackage',
             '--name', execName,
             '--dest', packDir,
             '--input', workingDir.relativePath(jar.archiveFile.get().asFile.getParentFile()),
